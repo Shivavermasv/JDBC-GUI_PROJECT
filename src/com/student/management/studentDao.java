@@ -5,190 +5,136 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.*;
 
-public class studentDao {
-	static String[] data= { "ID" , "ID" , "NAME" , "CONTACT" };
-	static String [][] stud=new String[20][20];
-	public static void stud_clear() {
-		for(int I=0;I<stud.length;I++) {
-			for(int j=0; j<stud.length;j++) {
-				stud[I][j]="";
+class studentDao {
+	// to store new student details in the database
+	void insert_studenttoDB(student st) {
+		try {
+			// jdbc code...
+			Connection con = connection.createc();
+			String query = "INSERT INTO `Student` (`sname`,`sphone`,`scity`) VALUES (?,?,?)";
+			PreparedStatement pstmt = con.prepareStatement(query);
+			// set the value of parameter
+			pstmt.setString(1, st.getStudentname());
+			pstmt.setString(2, st.getStudentphn());
+			pstmt.setString(3, st.getStudentcity());
+
+			pstmt.executeUpdate();
+			new student_frame("STUDENT ADDED SUCCESSFULLY !!");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			new student_frame("TRY AGAIN !!");
+		}
+	}
+
+	// To Delete a student from the database using student id
+	boolean delete_studentfromDB(int sid) {
+		try {
+			Connection con = connection.createc();
+			String query = "DELETE FROM `student` WHERE `sid`=?";
+			PreparedStatement pstmt = con.prepareStatement(query);
+			pstmt.setInt(1, sid);
+			pstmt.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	// to delete a student from the database using name
+	boolean delete_studentfromDB(String sname) {
+		try {
+			Connection con = connection.createc();
+			String query = "DELETE FROM `student` WHERE `sname`=?";
+			PreparedStatement pstmt = con.prepareStatement(query);
+			pstmt.setString(1, sname);
+			pstmt.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	// to show all students
+	void show_Allstudents() {
+		try {
+			Connection con = connection.createc();
+			String query = "SELECT * FROM `student`";
+			Statement smnt = con.createStatement();
+			ResultSet set = smnt.executeQuery(query);
+
+			if (!set.next()) {
+				new student_frame("NO DATA IS PRESENT !!");
+				return;
 			}
-		}
-	}
-	static int id;
-	static String sdname ;
-	static String sdphn ;
-	static String sdcity ;
-public static boolean insert_studenttoDB(student st) {
-	boolean f=false;
-	try {
-		//jdbc code...
-		Connection con =connection.createc();
-		String query="INSERT INTO `Student` (`sname`,`sphone`,`scity`) VALUES (?,?,?)";
-		PreparedStatement pstmt=con.prepareStatement(query);
-		//set the value of parameter 
-		pstmt.setString(1,st.getStudentname());
-		pstmt.setString(2,st.getStudentphn());
-		pstmt.setString(3,st.getStudentcity());
-		
-		//excecute//
-		pstmt.executeUpdate();
-		f=true;
-		
-	}
-	catch(SQLException e) {
-		e.printStackTrace();
-	}
-	
-	
-	return f;
-	
-}
-public static boolean delete_studentfromDB(int sid) {
-	boolean d;
-	
-	try {
-		Connection con=connection.createc();
-		String query="DELETE FROM `student` WHERE `sid`=?";
-		PreparedStatement pstmt=con.prepareStatement(query);
-		pstmt.setInt(1, sid);
-		
-		pstmt.executeUpdate();
-		d=true;
-	}
-	catch(SQLException e) {
-		e.printStackTrace();
-		d=false;
-	}
-	
-	
-	return d;
-}
-public static boolean delete_studentfromDB(String sname) {
-	boolean d;
-	
-	try {
-		Connection con=connection.createc();
-		String query="DELETE FROM `student` WHERE `sname`=?";
-		PreparedStatement pstmt=con.prepareStatement(query);
-		pstmt.setString(1, sname);
-		
-		pstmt.executeUpdate();
-		d=true;
-	}
-	catch(SQLException e) {
-		e.printStackTrace();
-		d=false;
-	}
-	
-	
-	return d;
-}
-public static void show_Allstudents() {
-	
-	try {
-		Connection con=connection.createc();
-		String query="SELECT * FROM `student`";
-		Statement smnt=con.createStatement();
-		ResultSet set=smnt.executeQuery(query);
-	
-		System.out.println("ID    NAME           PHN           CITY ");
-		int i=0;
-		while(set.next()) {
-			int id=set.getInt(1);
-			String sname=set.getString(2);
-			String phn=set.getString(3);
-			String city=set.getString(4);
-			stud[i][1]=Integer.toString(id);
-			stud[i][2]=sname;
-			stud[i][3]=phn;
-			stud[i][4]=city;
-			i++;
-		System.out.println(id+"    "+sname+"    "+phn+"    "+city);	
-			
-		}
-		if(set.next()==false) {
-			System.out.println("END_OF_DATA");
-		}
-		
-	}
-	catch(SQLException e) {
-		e.printStackTrace();
-		
-	}
-}
-public static boolean show_student(String sname) {
-	
-	boolean s=true;
-	try {
-		Connection con=connection.createc();
-		String query="SELECT * FROM `student` WHERE `sname`=?";
-		PreparedStatement psmnt=con.prepareStatement(query);
-		psmnt.setString(1, sname);
-		ResultSet set=psmnt.executeQuery();
-	
-		System.out.println("ID    NAME           PHN           CITY ");
-		while(set.next()) {
-			int id=set.getInt(1);
-			String name=set.getString(2);
-			String phn=set.getString(3);
-			String city=set.getString(4);
-			if(set.getString(2)==null) {
-				System.out.println("END_OF_DATA");
-				return s=false;
+			ArrayList<ArrayList<String>> list = new ArrayList<>();
+			ArrayList<String> data;
+			do {
+				data = new ArrayList<>();
+				data.add(set.getString(2));
+				data.add(set.getString(3));
+				data.add(set.getString(4));
+				list.add(data);
+			} while (set.next());
+			String data_array[][] = new String[list.size()][3];
+			int i = 0;
+			for (ArrayList<String> l : list) {
+				String arr[] = l.toString().split(",");
+				int j = 0;
+				for (String s : arr) {
+					data_array[i][j] = s.replaceAll("[^a-zA-Z0-9]", "");
+					j++;
+				}
+				i++;
 			}
-		System.out.println(id+"    "+name+"    "+phn+"    "+city);	
-		    studentDao.id=id;
-		    sdname=name;
-	        sdphn=phn;
-	        sdcity=city;
+			String[] col_name = { "NAME", "PHN", "CITY" };
 
+			new students_display(data_array, col_name);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		//s=true;
 	}
-	catch(SQLException e) {
-		e.printStackTrace();
-		s=false;
-	}
-	return s;
-}
 
-public static boolean show_student(int id) {
-	
-	boolean s=false;
-	try {
-		Connection con=connection.createc();
-		String query="SELECT * FROM `student` WHERE `sid`=?";
-		PreparedStatement psmnt=con.prepareStatement(query);
-		psmnt.setInt(1, id);
-		ResultSet set=psmnt.executeQuery();
-	
-		System.out.println("ID    NAME           PHN           CITY ");
+	// to show student details using student name
+	void show_student(String sname) {
+		try {
+			Connection con = connection.createc();
+			String query = "SELECT * FROM `student` WHERE `sname`=?";
+			PreparedStatement psmnt = con.prepareStatement(query);
+			psmnt.setString(1, sname);
+			ResultSet set = psmnt.executeQuery();
+			if (!set.next()) {
+				new student_frame("STUDENT DOESNT EXIST !!");
+				return;
+			} else {
+				new student_frame(set.getString(2), set.getString(3), set.getString(4));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
-		while(set.next()) {
-			int sid=set.getInt(1);
-			String name=set.getString(2);
-			String phn=set.getString(3);
-			String city=set.getString(4);
-			
-		System.out.println(sid+"    "+name+"    "+phn+"    "+city);	
-        sdname=name;
-        sdphn=phn;
-        sdcity=city;
-		if(name==null) {
-			System.out.println("END_OF_DATA");
-			s=false;
+	// to show student details using student id
+	void show_student(int id) {
+		try {
+			Connection con = connection.createc();
+			String query = "SELECT * FROM `student` WHERE `sid`=?";
+			PreparedStatement psmnt = con.prepareStatement(query);
+			psmnt.setInt(1, id);
+			ResultSet set = psmnt.executeQuery();
+			if (!set.next()) {
+				new student_frame("STUDENT DOESNT EXIST !!");
+				return;
+			} else {
+				new student_frame(set.getString(2), set.getString(3), set.getString(4));
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		s=true;
-		}
-		
 	}
-	catch(SQLException e) {
-		e.printStackTrace();
-		
-	}
-	return s;
-}
 
 }
